@@ -53,101 +53,60 @@ class Surface(ttk.Frame):
         frame_right2 = ttk.Frame(self)
         top = ttk.Frame(self)
         win.title("车牌识别")
-        win.minsize(1050, 700)
-        # win.wm_attributes('-topmost', 1)
+        win.minsize(1160, 850)
         self.center_window()
         self.pic_path3 = ""
         self.cameraflag = 0
         self.ft = ('Times', 18, 'bold')
         # top部分-------------------------------------------------------------------------------------------------
-        top.pack(side='top', expand=1, fill=tk.Y)
+        top.pack(side='top', expand=1)
         L1 = ttk.Label(top, text='欢迎使用车牌识别', font=('楷体', 26, 'bold'))
-        L1.pack(side='left', pady=18)
+        L1.pack(side='top', pady=15)
         L2 = ttk.Label(top, text='—————第十五组：三尺童子队', font=('宋体', 18, 'bold italic'))
-        L2.pack(side='bottom', pady=30)
+        L2.pack(side='right', pady=30)
         self.pack(fill=tk.BOTH, expand=tk.YES, padx="10", pady="10")
         frame_left.pack(side='left', expand=1)
-        frame_right1.pack(side='top', expand=0)
-        frame_right2.pack(side='right', expand=0)
+        frame_right1.pack(side='top', expand=0, pady=20)
+        frame_right2.pack(side='bottom', expand=0)
+
+        s = ttk.Style()
+        s.configure('my.TButton', font=('宋体', 16), foreground="Orange")
+
         # frame_right部分--------------------------------------------------------------------------------------------------------
 
         self.image_ctl = ttk.Label(frame_left)
         self.image_ctl.pack(anchor="nw")
 
-        ttk.Label(frame_right1, text='定位车牌位置：', width=40, font=('黑体', 14)).grid(column=0, row=0)
-        ttk.Label(frame_right1, text='定位识别结果：', width=40, font=('黑体', 14)).grid(column=0, row=3)
+        ttk.Label(frame_right1, text='定位车牌位置：', width=20, font=('黑体', 14)).grid(column=0, row=0)
+        ttk.Label(frame_right1, text='定位识别结果：', width=20, font=('黑体', 14)).grid(column=0, row=3)
 
-        from_pic_ctl = ttk.Button(frame_right2, text="来自图片",  width=40, command=self.from_pic)
-        from_pic_ctl.pack(anchor="se", pady="5")
+        from_pic_ctl = ttk.Button(frame_right2, text="来自图片", width=30, style='my.TButton', command=self.from_pic)
+        from_pic_ctl.pack(anchor="center", pady="15")
 
-        reset_ctl = ttk.Button(frame_right2, text="重置窗口", width=40, command=self.reset)
-        reset_ctl.pack(anchor="se", pady="5")
+        reset_ctl = ttk.Button(frame_right2, text="重置窗口", width=30, style='my.TButton', command=self.reset)
+        reset_ctl.pack(anchor="se", pady="15")
 
-        clean_ctrl = ttk.Button(frame_right2, text="清除识别数据", width=40, command=self.clean)
-        clean_ctrl.pack(anchor="se", pady="5")
-
-        # from_vedio_ctl = ttk.Button(frame_right2, text="打开/关闭摄像头", width=20, command=self.from_vedio)
-        # from_vedio_ctl.pack(anchor="se", pady="5")
-
-        # from_video_ctl = ttk.Button(frame_right2, text="拍照并识别", width=20, command=self.video_pic)
-        # from_video_ctl.pack(anchor="se", pady="5")
-
-        # self.cut_ctrl = ttk.Button(frame_right2, text="截图识别", width=20, command=self.cut_pic)
-        # self.cut_ctrl.pack(anchor="se", pady="5")
+        clean_ctrl = ttk.Button(frame_right2, text="清除识别数据", width=30, style='my.TButton', command=self.clean)
+        clean_ctrl.pack(anchor="se", pady="15")
 
         # 图片显示-------------------------------------------------------------------------------------------------------------------------
         self.roi_ctl = ttk.Label(frame_right1)
-        self.roi_ctl.grid(column=0, row=1)
+        self.roi_ctl.grid(column=0, row=1, pady=30)
 
-        self.r_ctl = ttk.Label(frame_right1, text="", font=('Times', '20'))
-        self.r_ctl.grid(column=0, row=4)
+        self.r_ctl = ttk.Label(frame_right1, text="", font=('Times', '20'), foreground="SandyBrown")
+        self.r_ctl.grid(column=0, row=4, pady=30)
 
-        # self.color_ctl = ttk.Label(frame_right1, text="", width="20")
-        # self.color_ctl.grid(column=0, row=4, sticky=tk.W)
-
-        ttk.Label(frame_right1, text='-------------------------------').grid(column=0, row=5)
-
-        # self.roi_ct2 = ttk.Label(frame_right1)
-        # self.roi_ct2.grid(column=0, row=7, sticky=tk.W)
-
-        # self.r_ct2 = ttk.Label(frame_right1, text="", font=('Times', '20'))
-        # self.r_ct2.grid(column=0, row=9, sticky=tk.W)
-        # self.color_ct2 = ttk.Label(frame_right1, text="", width="20")
-        # self.color_ct2.grid(column=0, row=10, sticky=tk.W)
+        ttk.Label(frame_right1, text='---------------------------------------').grid(column=0, row=5)
 
         self.clean()
         self.apistr = None
-
-        # self.predictor = predict.CardPredictor()
-        # self.predictor.train_svm()
-
-    # def cut_pic(self):
-    #     # 最小化主窗口
-    #     win.state('icon')
-    #     sleep(0.2)
-    #     filename = "tmp/cut.gif"
-    #     im = ImageGrab.grab()
-    #     im.save(filename)
-    #     im.close()
-    #     # 显示全屏幕截图
-    #     w = screencut.MyCapture(win, filename)
-    #     self.cut_ctrl.wait_window(w.top)
-
-    #     # 截图结束，恢复主窗口，并删除临时的全屏幕截图文件
-    #     win.state('normal')
-    #     os.remove(filename)
-    #     self.cameraflag = 0
-    #     self.pic_path = "tmp/cut.png"
-    #     self.clean()
-    #     self.pic_source = "来自截图"
-    #     self.pic(self.pic_path)
 
     def reset(self):
         self.reset2()
         self.reset2()
 
     def reset2(self):
-        win.geometry("1050x700")
+        win.geometry("1160x850")
         self.clean()
         self.thread_run7 = False
         self.count = 0
@@ -193,85 +152,6 @@ class Surface(ttk.Frame):
         height = int(h * factor)
         return pil_image.resize((width, height))
 
-    # def show_roi1(self, r, roi, color):
-    #     if r:
-    #         try:
-    #             roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
-    #             roi = Image.fromarray(roi)
-    #             w, h = roi.size
-    #             pil_image_resized = self.resize(w, h, roi)
-    #             self.tkImage1 = ImageTk.PhotoImage(image=pil_image_resized)
-    #             # self.imgtk_roi1 = ImageTk.PhotoImage(image=roi)
-    #             self.roi_ctl.configure(image=self.tkImage1, state='enable')
-    #         except:
-    #             pass
-    #         self.r_ctl.configure(text=str(r))
-    #         self.update_time = time.time()
-    #         try:
-    #             c = self.color_transform[color]
-    #             self.color_ctl.configure(text=c[0], state='enable')
-    #         except:
-    #             self.color_ctl.configure(state='disabled')
-    #     elif self.update_time + 8 < time.time():
-    #         self.roi_ctl.configure(state='disabled')
-    #         self.r_ctl.configure(text="")
-    #         self.color_ctl.configure(state='disabled')
-
-    # def show_roi2(self, r, roi, color):
-    #     if r:
-    #         try:
-    #             roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
-    #             roi = Image.fromarray(roi)
-    #             w, h = roi.size
-    #             pil_image_resized = self.resize(w, h, roi)
-    #             self.tkImage2 = ImageTk.PhotoImage(image=pil_image_resized)
-    #             # self.imgtk_roi2 = ImageTk.PhotoImage(image=roi)
-    #             self.roi_ct2.configure(image=self.tkImage2, state='enable')
-    #         except:
-    #             pass
-    #         self.r_ct2.configure(text=str(r))
-    #         self.update_time = time.time()
-    #         try:
-    #             c = self.color_transform[color]
-    #             self.color_ct2.configure(text=c[0], state='enable')
-    #         except:
-    #             self.color_ct2.configure(state='disabled')
-    #     elif self.update_time + 8 < time.time():
-
-    #         self.roi_ct2.configure(state='disabled')
-    #         self.r_ct2.configure(text="")
-    #         self.color_ct2.configure(state='disabled')
-
-    # def from_vedio(self):
-    #     if self.thread_run:
-    #         if self.camera.isOpened():
-    #             self.camera.release()
-    #             print("关闭摄像头")
-    #             self.camera = None
-    #             self.thread_run = False
-    #         return
-    #     if self.camera is None:
-    #         self.camera = cv2.VideoCapture(1)
-    #         if not self.camera.isOpened():
-    #             self.camera = None
-    #             print("没有外置摄像头")
-    #             self.camera = cv2.VideoCapture(0)
-    #             if not self.camera.isOpened():
-    #                 print("没有内置摄像头")
-    #                 tkinter.messagebox.showinfo('警告', '摄像头打开失败！')
-    #                 self.camera = None
-    #                 return
-    #             else:
-    #                 print("打开内置摄像头")
-    #         else:
-    #             print("打开外置摄像头")
-    #     self.pic_source = "摄像头"
-    #     self.cameraflag = 0
-    #     self.thread = threading.Thread(target=self.vedio_thread)
-    #     self.thread.setDaemon(True)
-    #     self.thread.start()
-    #     self.thread_run = True
-
     def pic(self, pic_path):
         self.apistr = None
         wpod_net_path = "D:\\TEMP_Work\\License_Plate_Recognition\\lp-detector\\wpod-net_final_2"
@@ -290,38 +170,6 @@ class Surface(ttk.Frame):
         self.r_ctl.configure(text=pred_str)
         # first_img, oldimg = self.predictor.img_first_pre(img_bgr)
 
-        # # 摄像头
-        # if not self.cameraflag:
-        #     self.imgtk = self.get_imgtk(img_bgr)
-        #     self.image_ctl.configure(image=self.imgtk)
-
-        # th1 = ThreadWithReturnValue(target=self.predictor.img_color_contours, args=(first_img, oldimg))
-        # th2 = ThreadWithReturnValue(target=self.predictor.img_only_color, args=(oldimg, oldimg, first_img))
-        # th1.start()
-        # th2.start()
-
-        # r_c, roi_c, color_c = th1.join()
-        # r_color, roi_color, color_color = th2.join()
-
-        # # if not color_color:
-        # #     color_color = color_c
-        # if not color_c:
-        #     color_c = color_color
-
-        # # self.show_roi2(r_color, roi_color, color_color)
-        # self.show_roi1(r_c, roi_c, color_c)
-        # # self.center_window()
-
-        # localtime = time.asctime(time.localtime(time.time()))
-        # if not self.cameraflag:
-        #     if not (r_color or color_color or r_c or color_c):
-        #         self.api_ctl2(pic_path)
-        #         return
-        #     value = [localtime, color_c, r_c, color_color, r_color, self.apistr, self.pic_source]
-
-        # print(localtime, "|", color_c, r_c, "|", color_color, r_color, "| ", self.apistr, "|", self.pic_source)
-
-    # ok
     def from_pic(self):
         self.thread_run = False
         self.thread_run2 = False
@@ -332,82 +180,6 @@ class Surface(ttk.Frame):
         self.pic_source = "本地文件：" + self.pic_path
         self.pic(self.pic_path)
 
-    # def get_img_list(self, images_path):
-    #     self.count = 0
-    #     self.array_of_img = []
-    #     for filename in os.listdir(images_path):
-    #         # print(filename)
-    #         try:
-    #             self.pilImage3 = Image.open(images_path + "/" + filename)
-    #             self.array_of_img.append(images_path + "/" + filename)
-    #             self.count = self.count + 1
-    #             # images_path2 = images_path + "/" + filename
-    #             # self.pic_path2 = images_path2
-    #         except:
-    #             pass
-    #     print(self.array_of_img)
-
-    # def vedio_thread(self):
-    #     self.thread_run = True
-    #     while self.thread_run:
-    #         _, self.img_bgr = self.camera.read()
-    #         self.imgtk = self.get_imgtk(self.img_bgr)
-    #         self.image_ctl.configure(image=self.imgtk)
-    #     print("run end")
-
-    # def video_pic2(self):
-    #     self.thread_run2 = True
-    #     predict_time = time.time()
-    #     while self.thread_run2:
-    #         if self.cameraflag:
-    #             if time.time() - predict_time > 2:
-    #                 print("实时识别中self.cameraflag", self.cameraflag)
-    #                 cv2.imwrite("tmp/test.jpg", self.img_bgr)
-    #                 self.pic_path = "tmp/test.jpg"
-    #                 self.pic(self.pic_path)
-    #                 predict_time = time.time()
-    #     print("run end")
-
-    # def video_pic(self):
-    #     if not self.thread_run:
-    #         tkinter.messagebox.showinfo('提示', '请点击    [打开摄像头]    按钮！')
-    #         return
-    #     self.thread_run = False
-    #     self.thread_run2 = False
-    #     _, img_bgr = self.camera.read()
-    #     cv2.imwrite("tmp/test.jpg", img_bgr)
-    #     self.pic_path = "tmp/test.jpg"
-    #     self.clean()
-    #     self.pic(self.pic_path)
-    #     print("video_pic")
-
-    # def getuser(self):
-    #     user = self.user_text.get()
-    #     return user
-
-    #     self.thread_run = False
-    #     self.thread_run2 = False
-    #     colorstr, textstr = api_pic(self.pic_path)
-    #     self.apistr = colorstr + textstr
-    #     self.show_roi1(textstr, None, colorstr)
-    #     self.show_roi2(textstr, None, colorstr)
-    #     localtime = time.asctime(time.localtime(time.time()))
-    #     value = [localtime, None, None, None, None, self.apistr, self.pic_source]
-    #     print(localtime, "|", "|", "| ", self.apistr, "|", self.pic_source)
-
-    # def api_ctl2(self, pic_path66):
-    #     if self.thread_run:
-    #         return
-    #     self.thread_run = False
-    #     self.thread_run2 = False
-    #     colorstr, textstr = api_pic(pic_path66)
-    #     self.apistr = colorstr + textstr
-    #     self.show_roi1(textstr, None, colorstr)
-    #     self.show_roi2(textstr, None, colorstr)
-    #     localtime = time.asctime(time.localtime(time.time()))
-    #     value = [localtime, None, None, None, None, self.apistr, self.pic_source]
-    #     print(localtime, "|", "|", "| ", self.apistr, "|", self.pic_source)
-
     def clean(self):
         if self.thread_run:
             self.cameraflag = 0
@@ -415,23 +187,17 @@ class Surface(ttk.Frame):
         self.thread_run = False
         self.thread_run2 = False
         # img_bgr3 = img_math.img_read("pic/hy.png")
-        img_bgr3 = img_math.img_read("pic/sc1.jpg")
+        img_bgr3 = img_math.img_read("pic/src2.jpg")
         self.imgtk2 = self.get_imgtk(img_bgr3)
         self.image_ctl.configure(image=self.imgtk2)
 
         self.r_ctl.configure(text="")
-        # self.color_ctl.configure(text="", state='enable')
-
-        # self.r_ct2.configure(text="")
-        # self.color_ct2.configure(text="", state='enable')
 
         self.pilImage3 = Image.open("pic/locate.png")
         w, h = self.pilImage3.size
         pil_image_resized = self.resize(w, h, self.pilImage3)
         self.tkImage3 = ImageTk.PhotoImage(image=pil_image_resized)
         self.roi_ctl.configure(image=self.tkImage3, state='enable')
-
-        # self.roi_ct2.configure(image=self.tkImage3, state='enable')
 
 
 def close_window():
