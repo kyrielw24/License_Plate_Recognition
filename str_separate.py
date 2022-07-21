@@ -216,8 +216,10 @@ def separate_and_predict(IMAGE_PATH):
         predict_result.append(charactor)
         predict_str = "".join(predict_result)
 
-    # plt_show_g(pic[0])
-    # print(pic[0].shape)
+    # for i in range(len(pic)):
+    #     plt_show_g(pic[i])
+    # plt_show_g(np.hstack(pic))
+
     return predict_str
 
 

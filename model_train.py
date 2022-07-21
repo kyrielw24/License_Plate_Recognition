@@ -145,7 +145,7 @@ Ytrain = np.empty((batch_size, int(input_dim / model_stride), int(input_dim / mo
 model_path_backup = '%s\%s_backup' % (outdir, 'wpod-net')
 model_path_final = '%s\%s_final' % (outdir, 'wpod-net')
 
-opt = keras.optimizers.Adam(learning_rate=0.001)
+opt = keras.optimizers.Adam(learning_rate=0.0003)
 wpod_net.compile(opt, loss)
 
 for it in range(iterations):

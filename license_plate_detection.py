@@ -14,6 +14,7 @@ from src.label import Shape, writeShapes
 def adjust_pts(pts, lroi):
     return pts * lroi.wh().reshape((2, 1)) + lroi.tl().reshape((2, 1))
 
+path = None
 
 def detection(img_path, output_dir, wpod_net_path):
     # input_dir = 'D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input_test'
@@ -54,6 +55,49 @@ def detection(img_path, output_dir, wpod_net_path):
     # writeShapes('%s/%s_lp.txt' % (output_dir, bname), [s])
 
     return path
+
+
+def detection_1():
+    input_dir = 'D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input_test'
+    output_dir = input_dir
+
+    lp_threshold = .5
+
+    wpod_net_path = 'D:\\TEMP_Work\\License_Plate_Recognition\\lp-detector\\wpod-net_update1'
+    wpod_net = load_model(wpod_net_path)
+
+    imgs_paths = glob('%s/*.jpg' % input_dir)
+
+    print('Searching for license plates using WPOD-NET')
+
+    for i, img_path in enumerate(imgs_paths):
+
+        print('\t Processing %s' % img_path)
+
+        bname = splitext(basename(img_path))[0]
+        Ivehicle = cv2.imread(img_path)
+
+        ratio = float(max(Ivehicle.shape[:2])) / min(Ivehicle.shape[:2])
+        side = int(ratio * 288.)
+        bound_dim = min(side + (side % (2 ** 4)), 608)
+        print("\t\tBound dim: %d, ratio: %f" % (bound_dim, ratio))
+
+        Llp, LlpImgs, _ = detect_lp(wpod_net, im2single(Ivehicle), bound_dim, 2 ** 4, (240, 80), lp_threshold)
+
+        if len(LlpImgs):
+            Ilp = LlpImgs[0]
+            Ilp = cv2.cvtColor(Ilp, cv2.COLOR_BGR2GRAY)
+            Ilp = cv2.cvtColor(Ilp, cv2.COLOR_GRAY2BGR)
+
+            s = Shape(Llp[0].pts)
+
+            cv2.imwrite('%s/%s_lp.png' % (output_dir, bname), Ilp * 255.)
+            writeShapes('%s/%s_lp.txt' % (output_dir, bname), [s])
+
+
+# input_dir = 'D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input_test'
+# wpod_net_path = 'D:\\TEMP_Work\\License_Plate_Recognition\\lp-detector\\wpod-net_final'
+# detection_1()
 
 # if __name__ == '__main__':
 
