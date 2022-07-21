@@ -120,7 +120,7 @@ def separate_and_predict(IMAGE_PATH):
 
     # 读入原图片对象
     source_image = cv2.imread(IMAGE_PATH)
-    plt_show(source_image)
+    # plt_show(source_image)
 
     # 高斯去噪、灰度化
     G_image = cv2.GaussianBlur(source_image, (3, 3), 0)
@@ -143,7 +143,7 @@ def separate_and_predict(IMAGE_PATH):
     wave = max(wave_peaks, key=lambda x: x[1] - x[0])
     gray_img = gray_img[wave[0]:wave[1]]
     no_img = gray[wave[0]:wave[1]]
-    plt_show_g(gray_img)
+    # plt_show_g(gray_img)
     # plt_show_g(no_img)
 
     # 查找垂直直方图波峰
@@ -216,8 +216,10 @@ def separate_and_predict(IMAGE_PATH):
         predict_result.append(charactor)
         predict_str = "".join(predict_result)
 
+    # plt_show_g(pic[0])
+    # print(pic[0].shape)
     return predict_str
 
 
-str = separate_and_predict("D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input\\1_lp.png")
-print(str)
+# str = separate_and_predict("D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input\\8_lp.png")
+# print(str)
