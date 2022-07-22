@@ -14,7 +14,9 @@ from src.label import Shape, writeShapes
 def adjust_pts(pts, lroi):
     return pts * lroi.wh().reshape((2, 1)) + lroi.tl().reshape((2, 1))
 
+
 path = None
+
 
 def detection(img_path, output_dir, wpod_net_path):
     # input_dir = 'D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input_test'
@@ -57,6 +59,11 @@ def detection(img_path, output_dir, wpod_net_path):
     return path
 
 
+# path = detection("D:\\TEMP_Work\\License_Plate_Recognition\\pic\\1.jpg", "D:\\TEMP_Work\\License_Plate_Recognition",
+#                  "D:\\TEMP_Work\\License_Plate_Recognition\\lp-detector\\wpod-net_update1")
+#
+# print(path)
+
 def detection_1():
     input_dir = 'D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input_test'
     output_dir = input_dir
@@ -93,7 +100,6 @@ def detection_1():
 
             cv2.imwrite('%s/%s_lp.png' % (output_dir, bname), Ilp * 255.)
             writeShapes('%s/%s_lp.txt' % (output_dir, bname), [s])
-
 
 # input_dir = 'D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input_test'
 # wpod_net_path = 'D:\\TEMP_Work\\License_Plate_Recognition\\lp-detector\\wpod-net_final'

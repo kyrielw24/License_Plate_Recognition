@@ -3,9 +3,11 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 from numpy.linalg import norm
+import tensorflow as tf
+import h5py
 
 PROVINCE_START = 1000
-SZ = 20  # 训练图片长宽
+SZ = 32  # 训练图片长宽
 provinces = [
     "zh_cuan", "川",
     "zh_e", "鄂",
@@ -40,8 +42,53 @@ provinces = [
     "zh_zhe", "浙"
 ]
 
+chi = ["川", "鄂", "赣", "甘", "贵", "桂", "黑", "沪", "冀", "津",
+       "京", "吉", "辽", "鲁", "蒙", "闽", "宁", "青", "琼", "陕",
+       "苏", "晋", "皖", "湘", "新", "豫", "渝", "粤", "云", "藏",
+       "浙"]
+
+enu = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+       'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
+       'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+       'W', 'X', 'Y', 'Z']
+
 model = cv2.ml.SVM_load("lib/svm.dat")
 modelchinese = cv2.ml.SVM_load("lib/svmchinese.dat")
+
+resmodelchs = tf.keras.models.load_model("lib/resnet50_chs_no_noise.h5")
+resmodelenu = tf.keras.models.load_model("lib/resnet50_enu_no_noise.h5")
+
+
+# 构造LeNet5模型
+class LeNet5(tf.keras.Model):
+
+    def __init__(self):
+        super(LeNet5, self).__init__()
+        self.c1 = tf.keras.layers.Conv2D(filters=6, kernel_size=(5, 5), activation='tanh')
+        self.p1 = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=2)
+        self.c2 = tf.keras.layers.Conv2D(filters=16, kernel_size=(5, 5), activation='tanh')
+        self.p2 = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=2)
+        self.flatten = tf.keras.layers.Flatten()
+        self.f1 = tf.keras.layers.Dense(120, activation='tanh')
+        self.f2 = tf.keras.layers.Dense(84, activation='tanh')
+        self.f3 = tf.keras.layers.Dense(31, activation='softmax')
+
+    def call(self, inputs):
+        x = self.c1(inputs)
+        x = self.p1(x)
+        x = self.c2(x)
+        x = self.p2(x)
+        x = self.flatten(x)
+        x = self.f1(x)
+        x = self.f2(x)
+        y = self.f3(x)
+        return y
+
+
+new_modelchs = LeNet5()
+new_modelchs.load_weights('lib/lenet5_chs_weight')
+new_modelenu = LeNet5()
+new_modelenu.load_weights('lib/lenet5_ens_weight')
 
 
 def cv_show(name, image):
@@ -129,7 +176,27 @@ def separate_and_predict(IMAGE_PATH):
 
     # 二值化
     ret, gray_img = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
-    # plt_show_g(gray_img)
+    plt_show_g(gray_img)
+
+    w = gray_img.shape[0]
+    h = gray_img.shape[1]
+    black_point = 0
+    white_point = 0
+    print(w, h)
+    for i in range(w):
+        for j in range(h):
+            if gray_img[i][j] == 0:
+                black_point = black_point + 1
+            else:
+                white_point = white_point + 1
+
+    # 黑字转白字
+    if white_point > black_point:
+        for i in range(w):
+            for j in range(h):
+                gray_img[i][j] = 255 - gray_img[i][j]
+
+    plt_show_g(gray_img)
 
     # 寻找波峰 波谷
     x_histogram = np.sum(gray_img, axis=1)
@@ -181,8 +248,11 @@ def separate_and_predict(IMAGE_PATH):
 
     part_cards = seperate_card(gray_img, wave_peaks)
 
+    L = len(part_cards)
     predict_result = []
+    predict_result1 = []
     predict_str = ""
+    predict_str1 = ""
     pic = []
 
     for pi, part_card in enumerate(part_cards):
@@ -195,33 +265,78 @@ def separate_and_predict(IMAGE_PATH):
         pic.append(part_card)
         part_card_old = part_card
 
-        w = abs(part_card.shape[1] - SZ) // 2
+        # w = abs(part_card.shape[1] - SZ) // 2
+        #
+        # part_card = cv2.copyMakeBorder(part_card, 0, 0, w, w, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+        # # plt_show_g(part_card)
+        # part_card = cv2.resize(part_card, (32, 32), interpolation=cv2.INTER_AREA)
+        #
+        # # plt_show_g(part_card)
+        # part_card = preprocess_hog([part_card])
+        # plt_show_g(part_card)
+        # test_predict = model_chs.predict(test_data)
+        # test_predict = np.argmax(test_predict, axis=1)
+        part_card_1 = cv2.resize(part_card, (28, 28))
+        part_card_1 = np.expand_dims(part_card_1, axis=0)
+        part_card_1 = np.expand_dims(part_card_1, axis=-1)
+        part_card_1 = tf.cast(part_card_1, tf.float32)
+        part_card = cv2.resize(part_card, (32, 32))
+        part_card = cv2.cvtColor(part_card, cv2.COLOR_GRAY2RGB)
+        part_card = np.expand_dims(part_card, axis=0)
+        # print(part_card.shape)
 
-        part_card = cv2.copyMakeBorder(part_card, 0, 0, w, w, cv2.BORDER_CONSTANT, value=[0, 0, 0])
-        # plt_show_g(part_card)
-        part_card = cv2.resize(part_card, (SZ, SZ), interpolation=cv2.INTER_AREA)
-        # plt_show_g(part_card)
-        part_card = preprocess_hog([part_card])
         if pi == 0:
-            resp = modelchinese.predict(part_card)
-            charactor = provinces[int(resp[1][0]) - PROVINCE_START]
+            # resp = resmodelchs.call(inputs=part_card, training=False, mask=None)
+            resp = resmodelchs.predict(part_card)
+            label = np.argmax(resp)
+            charactor = chi[label]
+            res = new_modelchs.predict(part_card_1)
+            label2 = np.argmax(res)
+            charactor1 = chi[label2]
+            # resp = modelchinese.predict(part_card)
+            # charactor = provinces[int(resp[1][0]) - PROVINCE_START]
+        elif pi == 1:
+            resp = resmodelenu.predict(part_card)
+            labels = np.argsort(-resp)
+            for i in range(10):
+                if labels[0][i] > 9:
+                    label = labels[0][i]
+                    break
+            charactor = enu[label]
+            resp1 = new_modelenu.predict(part_card_1)
+            labels1 = np.argsort(-resp1)
+            for i in range(10):
+                if labels1[0][i] > 9:
+                    label1 = labels1[0][i]
+                    break
+            charactor1 = enu[label1]
         else:
-            resp = model.predict(part_card)
-            charactor = chr(int(resp[1][0]))
+            # resp = model.predict(part_card)
+            # charactor = chr(int(resp[1][0]))
+            resp = resmodelenu.predict(part_card)
+            label = np.argmax(resp)
+            charactor = enu[label]
+            res = new_modelenu.predict(part_card_1)
+            label2 = np.argmax(res)
+            charactor1 = enu[label2]
         # 判断最后一个数是否是车牌边缘，假设车牌边缘被认为是1
-        if charactor == "1":
+        if charactor == "1" or pi == (L - 1):
             if part_card_old.shape[0] / part_card_old.shape[1] >= 7:  # 1太细，认为是边缘
                 continue
 
         predict_result.append(charactor)
         predict_str = "".join(predict_result)
 
-    # for i in range(len(pic)):
-    #     plt_show_g(pic[i])
+        predict_result1.append(charactor1)
+        predict_str1 = "".join(predict_result1)
+
+    for i in range(len(pic)):
+        plt_show_g(pic[i])
     # plt_show_g(np.hstack(pic))
 
-    return predict_str
+    return predict_str, predict_str1
 
 
-# str = separate_and_predict("D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input\\8_lp.png")
+# str, str1 = separate_and_predict("D:\\TEMP_Work\\license_work\\alpr-unconstrained\\samples\\input\\car1_lp.png")
 # print(str)
+# print(str1)

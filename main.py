@@ -142,18 +142,15 @@ class Surface(ttk.Frame):
         if (URL_len > 1050):
             msgbox.showinfo('提示', '网址过长！')
             return
-        r = requests.get(IMAGE_URL).content
-        # 生成图片名称
-        imgname = IMAGE_URL.split('/')[-1]
-        # 图片存储路径
-        imgpath = './tmp/url.jpeg'
+        r = requests.get(IMAGE_URL)
+        imgpath = 'tmp/url.jpg'
         with open(imgpath, 'wb') as f:
-            f.write(r)
+            f.write(r.content)
         # print(IMAGE_URL)
         self.thread_run = False
         self.thread_run2 = False
         self.cameraflag = 0
-        path1 = "D:\\TEMP_Work\\License_Plate_Recognition\\tmp\\"+"url.jpeg"
+        path1 = "D:\\TEMP_Work\\License_Plate_Recognition\\tmp\\" + "url.jpg"
         self.clean()
         self.pic_source = "网络地址：" + IMAGE_URL
         self.pic(path1)
@@ -220,28 +217,29 @@ class Surface(ttk.Frame):
         # self.now_pic_num = index + 1
         # self.check_flag()
         # pic_path = self.pred_path + str(index + 1) + ".jpg"
-        pic_path = pic_dir
-        img_bgr = img_math.img_read(pic_path)
-        self.imgtk = self.get_imgtk(img_bgr)
-        self.image_ctl.configure(image=self.imgtk)
-        out_dir = "D:/TEMP_Work/License_Plate_Recognition/pic"
-        out_path = detection(pic_path, out_dir, self.wpod_net_path)
-        pred_str = separate_and_predict(out_path)
-        print(pred_str)
-        self.img = Image.open(out_path)
-        w, h = self.img.size
-        img_resized = self.resize(w, h, self.img)
-        self.tkImage1 = ImageTk.PhotoImage(image=img_resized)
-        self.roi_ctl.configure(image=self.tkImage1, state='enable')
-        self.r_ctl.configure(text=pred_str)
+        # pic_path = pic_dir
+        # img_bgr = img_math.img_read(pic_path)
+        # self.imgtk = self.get_imgtk(img_bgr)
+        # self.image_ctl.configure(image=self.imgtk)
+        # out_dir = "D:/TEMP_Work/License_Plate_Recognition/pic"
+        # out_path = detection(pic_path, out_dir, self.wpod_net_path)
+        # pred_str, pred_str1 = separate_and_predict(out_path)
+        # print(pred_str)
+        # print("LeNet5:   ", pred_str1)
+        # self.img = Image.open(out_path)
+        # w, h = self.img.size
+        # img_resized = self.resize(w, h, self.img)
+        # self.tkImage1 = ImageTk.PhotoImage(image=img_resized)
+        # self.roi_ctl.configure(image=self.tkImage1, state='enable')
+        # self.r_ctl.configure(text=pred_str)
 
         # 多张图片使用预先经过yolo处理
         # num, path = darknet_function(pic_dir)   #  num是识别出来的有几张车辆图片   path 是这几张图片保留的位置
-        # num = 1
-        # self.pic_num = num
-        # self.pred_path = "D:\\TEMP_Work\\License_Plate_Recognition\\pic\\"
-        #
-        # self.pred_pic(index=0)
+        num = 8
+        self.pic_num = num
+        self.pred_path = "D:\\TEMP_Work\\License_Plate_Recognition\\pic\\"
+
+        self.pred_pic(index=3)
         # for index in range(num):
         #     self.now_pic_num = index + 1
         #     # self.check_flag()
@@ -269,7 +267,7 @@ class Surface(ttk.Frame):
         self.image_ctl.configure(image=self.imgtk)
         out_dir = "D:/TEMP_Work/License_Plate_Recognition/pic"
         out_path = detection(pic_path, out_dir, self.wpod_net_path)
-        pred_str = separate_and_predict(out_path)
+        pred_str, pred_str1 = separate_and_predict(out_path)
         print(pred_str)
         self.img = Image.open(out_path)
         w, h = self.img.size
